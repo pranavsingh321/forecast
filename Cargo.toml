@@ -1,0 +1,21 @@
+[package]
+name = "forecast"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+askama = { version = "0.12.0", features = ["with-axum"] }
+askama_axum = "0.3.0"
+axum = "0.6.20"
+axum-macros = "0.3.8"
+reqwest = {version="0.11.20", features=["json"]}
+serde = "1.0.188"
+sqlx = { version = "0.7.2", features = [
+	"runtime-tokio-rustls",
+	"macros",
+	"any",
+	"postgres",
+]}
+tokio = {version="1.32.0", features=["full"]}

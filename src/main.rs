@@ -25,6 +25,28 @@ async fn stats() -> &'static str {
     "stats"
 }
 
+async fn get_lat_long(pool: &PgPool, name: &str) -> Result<LatLong, Box<dyn std::error::Error>> {
+    let lat_long = sqlx::query_as::<_, LatLong>(
+        "SELECT lat AS latitude, long AS longitude FROM cities WHERE name = $1",
+        )
+        .bind(name)
+        .fetch_optional(pool)
+        .await?;
+
+    if let Some(lat_long) = lat_long {
+        return Ok(lat_long);
+    }
+
+    let lat_long = fetch_lat_long(name).await?;
+    sqlx::query("INSERT INTO cities (name, lat, long) VALUES ($1, $2, $3)")
+        .bind(name)
+        .bind(lat_long.latitude)
+        .bind(lat_long.longitude)
+        .execute(pool)
+        .await?;
+    Ok(lat_long)
+}
+
 async fn fetch_lat_long(city: &str) -> Result<LatLong, Box<dyn std::error::Error>> {
 	let endpoint = format!(
     	"https://geocoding-api.open-meteo.com/v1/search?name={}&count=1&language=en&format=json",
@@ -64,7 +86,7 @@ async fn weather(
     //    Err(_) => Err(StatusCode::NOT_FOUND),
 
     //}
-    let lat_long = fetch_lat_long(&params.city)
+    let lat_long = get_lat_long(&pool, &params.city)
         .await
         .map_err(|_| StatusCode::NOT_FOUND)?;
 

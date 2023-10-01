@@ -19,3 +19,6 @@ sqlx = { version = "0.7.2", features = [
 	"postgres",
 ]}
 tokio = {version="1.32.0", features=["full"]}
+
+[workspace]
+members = ["auth_lib"]
